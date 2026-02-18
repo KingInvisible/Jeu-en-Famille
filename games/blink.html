@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blink Code - Top Secret</title>
+    <style>
+        :root {
+            --spy-green: #00ff41;
+            --terminal-bg: #050505;
+        }
+
+        body {
+            background: var(--terminal-bg);
+            color: var(--spy-green);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .terminal {
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid var(--spy-green);
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            position: relative;
+        }
+
+        .screen-overlay {
+            position: absolute;
+            top:0; left:0; width:100%; height:100%;
+            background: repeating-linear-gradient(0deg, rgba(0,255,65,0.03) 0px, rgba(0,255,65,0.03) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+        }
+
+        h2 { font-size: 1.2rem; text-transform: uppercase; border-bottom: 1px solid var(--spy-green); padding-bottom: 10px; }
+
+        .btn-spy {
+            background: transparent;
+            border: 1px solid var(--spy-green);
+            color: var(--spy-green);
+            padding: 15px;
+            width: 100%;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-spy:hover { background: var(--spy-green); color: black; }
+
+        #secret-data {
+            display: none;
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px dashed var(--spy-green);
+            min-height: 80px;
+            /* On garde la même taille de bloc pour ne pas trahir l'espion */
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="terminal">
+    <div class="screen-overlay"></div>
+    
+    <div id="step-config">
+        <h2>System_Init</h2>
+        <p>> Nombre d'unités (4-10) :</p>
+        <input type="number" id="p-total" value="4" min="4" max="10" 
+               style="background:none; border:1px solid var(--spy-green); color:var(--spy-green); padding:5px; width:50px;">
+        <button class="btn-spy" onclick="setupGame()">Démarrer le protocole</button>
+    </div>
+
+    <div id="step-distrib" class="hidden">
+        <h2>Scanner_Rôles</h2>
+        <p id="player-id">> JOUEUR 1</p>
+        <button class="btn-spy" id="btn-view" onclick="reveal()">RÉVÉLER LES DONNÉES</button>
+        <div id="secret-data"></div>
+        <button class="btn-spy hidden" id="btn-next" onclick="next()">UNITÉ SUIVANTE</button>
+    </div>
+
+    <div id="step-brief" class="hidden">
+        <h2>En_Mission</h2>
+        <p>> Sujet de conversation :</p>
+        <p id="theme-display" style="color:white;"></p>
+        <p style="font-size:0.8rem; margin-top:30px;">[ALERTE] Identifiez vos alliés. Ne quittez pas les autres des yeux.</p>
+        <button class="btn-spy" onclick="location.reload()">Réinitialiser</button>
+    </div>
+</div>
+
+<script>
+    let players = [];
+    let currentIdx = 0;
+    let code = Math.floor(Math.random() * 3) + 2; 
+
+    function setupGame() {
+        let count = document.getElementById('p-total').value;
+        players = new Array(parseInt(count)).fill("INTERROGATEUR");
+        
+        // Placement de 2 espions
+        let s1 = Math.floor(Math.random() * count);
+        let s2 = Math.floor(Math.random() * count);
+        while(s1 === s2) s2 = Math.floor(Math.random() * count);
+        players[s1] = "ESPION";
+        players[s2] = "ESPION";
+
+        document.getElementById('step-config').classList.add('hidden');
+        document.getElementById('step-distrib').classList.remove('hidden');
+    }
+
+    function reveal() {
+        const box = document.getElementById('secret-data');
+        const role = players[currentIdx];
+        box.style.display = 'block';
+        
+        if(role === "ESPION") {
+            box.innerHTML = `RÔLE : <span style="color:white">ESPION</span><br>SIGNAL : <span style="color:white">${code} CLIGNEMENTS</span>`;
+        } else {
+            box.innerHTML = `RÔLE : <span style="color:white">INTERROGATEUR</span><br>SIGNAL : <span style="color:white">AUCUN</span>`;
+        }
+
+        document.getElementById('btn-view').classList.add('hidden');
+        document.getElementById('btn-next').classList.remove('hidden');
+    }
+
+    function next() {
+        currentIdx++;
+        document.getElementById('secret-data').style.display = 'none';
+        document.getElementById('btn-next').classList.add('hidden');
+        document.getElementById('btn-view').classList.remove('hidden');
+
+        if(currentIdx >= players.length) {
+            document.getElementById('step-distrib').classList.add('hidden');
+            document.getElementById('step-brief').classList.remove('hidden');
+            const themes = ["Vos pires vacances", "Un talent inutile", "Le film qui vous fait peur", "Votre plat secret"];
+            document.getElementById('theme-display').innerText = themes[Math.floor(Math.random()*themes.length)];
+        } else {
+            document.getElementById('player-id').innerText = "> JOUEUR " + (currentIdx + 1);
+        }
+    }
+</script>
+</body>
+</html>
