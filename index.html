@@ -64,25 +64,24 @@
 
 <script>
     function openGame(id) {
-        // 1. On cache le menu et on affiche la zone de jeu
+        // On affiche la vue du jeu
         document.getElementById('hub').style.display = 'none';
         document.getElementById('game-view').style.display = 'block';
         
-        // 2. On insère l'iframe avec le chemin vers le dossier 'games'
-        // IMPORTANT : 'id' sera remplacé par 'echo', 'sablier', etc.
         const gameUrl = `games/${id}.html`;
         
-        document.getElementById('content').innerHTML = 
+        // CORRECTION : On utilise bien 'game-content' comme dans l'id HTML plus haut
+        document.getElementById('game-content').innerHTML = 
             `<iframe src="${gameUrl}" style="width:100%; height:100%; border:none;"></iframe>`;
         
         console.log("Chargement du jeu : " + gameUrl);
     }
 
     function closeGame() {
-        // On réaffiche le menu et on vide l'iframe pour stopper les sons/chronos
         document.getElementById('hub').style.display = 'block';
         document.getElementById('game-view').style.display = 'none';
-        document.getElementById('content').innerHTML = "";
+        // CORRECTION : On utilise bien 'game-content' ici aussi
+        document.getElementById('game-content').innerHTML = "";
     }
 </script>
 
