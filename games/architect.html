@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Architectes Aveugles - Studio Design</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --draft-blue: #1a237e;
+            --paper: #fdfcf0;
+            --danger-red: #d32f2f;
+        }
+
+        body {
+            background: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .blueprint-card {
+            width: 90%;
+            max-width: 500px;
+            background: var(--paper);
+            border: 2px solid #ccc;
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.1);
+            padding: 30px;
+            position: relative;
+            background-image: 
+                radial-gradient(#d1d1d1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        h1 {
+            font-family: 'Special Elite', cursive;
+            color: var(--draft-blue);
+            text-align: center;
+            border-bottom: 2px solid var(--draft-blue);
+            margin-top: 0;
+            padding-bottom: 10px;
+        }
+
+        .rules-list {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            background: rgba(26, 35, 126, 0.05);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .target-box {
+            border: 3px dashed var(--draft-blue);
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            background: white;
+        }
+
+        .object-name {
+            font-family: 'Special Elite', cursive;
+            font-size: 2rem;
+            color: var(--draft-blue);
+            display: block;
+        }
+
+        .forbidden-zone {
+            color: var(--danger-red);
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .timer-bar-container {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            margin: 20px 0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        #timer-progress {
+            width: 100%;
+            height: 100%;
+            background: var(--draft-blue);
+            transition: width 1s linear;
+        }
+
+        .btn-draw {
+            width: 100%;
+            background: var(--draft-blue);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-weight: bold;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+
+        .btn-draw:hover { filter: brightness(1.2); }
+        .btn-draw:active { transform: translateY(2px); }
+
+        .hidden { display: none; }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+    </style>
+</head>
+<body>
+
+<div class="blueprint-card">
+    <h1>Bureau d'Études</h1>
+
+    <div id="step-rules">
+        <div class="rules-list">
+            <strong>📋 Directive :</strong> Faites dessiner l'objet mystère.<br>
+            <strong>🚫 Interdiction :</strong> Ne citez jamais l'objet, sa fonction ou des formes géométriques (carré, rond, etc.).<br>
+            <strong>💡 Astuce :</strong> Parlez en textures : "C'est rugueux", "C'est lourd", "C'est tranchant".
+        </div>
+        <button class="btn-draw" onclick="showSetup()">Préparer les plans</button>
+    </div>
+
+    <div id="step-secret" class="hidden">
+        <p style="text-align:center">Architecte, mémorisez votre plan :</p>
+        <div class="target-box">
+            <span class="object-name" id="obj-name">OBJET</span>
+            <div class="forbidden-zone" id="forbidden-list">MOTS INTERDITS</div>
+        </div>
+        <p style="font-size:0.8rem; color:#666; text-align:center">Cachez l'écran aux Maçons avant de cliquer.</p>
+        <button class="btn-draw" onclick="startChantier()">Lancer le chantier (2min)</button>
+    </div>
+
+    <div id="step-play" class="hidden">
+        <h2 style="text-align:center; color:var(--draft-blue)" id="timer-text">02:00</h2>
+        <div class="timer-bar-container">
+            <div id="timer-progress"></div>
+        </div>
+        <p style="text-align:center; font-style:italic">"Décrivez des sensations, pas des formes..."</p>
+        <button class="btn-draw" style="background:#444" onclick="location.reload()">Terminer le tour</button>
+    </div>
+</div>
+
+<script>
+    const plans = [
+        {name: "Un Volcan", forbidden: "Montagne, Feu, Lave, Triangle, Explosion"},
+        {name: "Un Appareil Photo", forbidden: "Image, Sourire, Clic, Rectangle, Flash"},
+        {name: "Une Montgolfière", forbidden: "Ciel, Air, Panier, Rond, Voler"},
+        {name: "Un Hamburger", forbidden: "Pain, Viande, Salade, Faim, Rond"},
+        {name: "Un Sapin", forbidden: "Noël, Arbre, Vert, Triangle, Épines"}
+    ];
+
+    let timeLeft = 120;
+    let timerId;
+
+    function showSetup() {
+        const p = plans[Math.floor(Math.random()*plans.length)];
+        document.getElementById('obj-name').innerText = p.name.toUpperCase();
+        document.getElementById('forbidden-list').innerText = "INTERDIT : " + p.forbidden.toUpperCase();
+        
+        document.getElementById('step-rules').classList.add('hidden');
+        document.getElementById('step-secret').classList.remove('hidden');
+    }
+
+    function startChantier() {
+        document.getElementById('step-secret').classList.add('hidden');
+        document.getElementById('step-play').classList.remove('hidden');
+        
+        const total = 120;
+        timerId = setInterval(() => {
+            timeLeft--;
+            const progress = (timeLeft / total) * 100;
+            document.getElementById('timer-progress').style.width = progress + "%";
+            
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('timer-text').innerText = 
+                `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+
+            if(timeLeft <= 10) {
+                document.getElementById('timer-text').classList.add('blink');
+                document.getElementById('timer-progress').style.background = "var(--danger-red)";
+            }
+
+            if(timeLeft <= 0) {
+                clearInterval(timerId);
+                alert("FIN DU CHANTIER ! Montrez vos œuvres.");
+            }
+        }, 1000);
+    }
+</script>
+</body>
+</html>
