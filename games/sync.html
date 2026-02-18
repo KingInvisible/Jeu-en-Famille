@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Sync - Fusion Mentale</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-pink: #ff007a;
+            --neon-blue: #00d2ff;
+            --bg-dark: #0a0a12;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-dark);
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 40px 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        /* CORRECTIF DÉGRADÉ TITRE */
+        h1 {
+            font-size: 3.5rem;
+            margin: 0;
+            letter-spacing: 8px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .rules-box {
+            text-align: left;
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 0.95rem;
+            border: 1px solid #333;
+            line-height: 1.4;
+        }
+
+        .word-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            gap: 15px;
+        }
+
+        .word-card {
+            flex: 1;
+            padding: 25px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+
+        .card-a { background: var(--neon-blue); color: #000; }
+        .card-b { background: var(--neon-pink); color: #000; }
+
+        .btn-main {
+            background: white;
+            color: black;
+            border: none;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-main:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,255,255,0.4); }
+        .btn-main:active { transform: scale(0.95); }
+
+        #countdown {
+            font-size: 7rem;
+            font-weight: 700;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 100;
+            text-shadow: 0 0 30px var(--neon-blue);
+            pointer-events: none;
+        }
+
+        .history-list {
+            margin-top: 20px;
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            color: #888;
+            border-top: 1px solid #222;
+            padding-top: 15px;
+        }
+
+        .input-fusion {
+            background: #1a1a2e;
+            border: 2px solid #333;
+            color: white;
+            padding: 15px;
+            width: 85%;
+            margin: 8px 0;
+            border-radius: 12px;
+            text-align: center;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .input-fusion:focus { border-color: var(--neon-blue); outline: none; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="countdown">3</div>
+
+<div class="container">
+    <h1>THE SYNC</h1>
+
+    <div id="step-rules">
+        <div class="rules-box">
+            <strong>🧠 Objectif :</strong> Prononcer le même mot en même temps.<br><br>
+            1. Chacun reçoit un mot différent.<br>
+            2. Au signal <strong>"FUSION"</strong>, criez un mot qui lie les deux concepts.<br>
+            3. Si c'est différent, repartez des nouveaux mots !
+        </div>
+        <button class="btn-main" onclick="showGame()">Lancer la synchro</button>
+    </div>
+
+    <div id="step-play" class="hidden">
+        <div class="word-display">
+            <div id="wordA" class="word-card card-a">?</div>
+            <div id="wordB" class="word-card card-b">?</div>
+        </div>
+        
+        <div id="action-zone">
+            <button class="btn-main" onclick="startCountdown()">3... 2... 1... FUSION !</button>
+        </div>
+
+        <div id="input-zone" class="hidden">
+            <input type="text" id="inA" class="input-fusion" placeholder="Mot du Joueur A">
+            <input type="text" id="inB" class="input-fusion" placeholder="Mot du Joueur B">
+            <br>
+            <button class="btn-main" style="margin-top:15px; background:var(--neon-blue)" onclick="validateSync()">Comparer</button>
+        </div>
+
+        <div class="history-list" id="history">LOGS : Attente de connexion...</div>
+    </div>
+
+    <div id="step-win" class="hidden">
+        <h2 style="color:var(--neon-blue); font-size: 2.5rem;">FUSION RÉUSSIE !</h2>
+        <p id="stats-final" style="font-size: 1.2rem;"></p>
+        <button class="btn-main" onclick="location.reload()">Nouvelle Partie</button>
+    </div>
+</div>
+
+<script>
+    const dictionary = ["Café", "Espace", "Viking", "Sushi", "Plage", "Robot", "Forêt", "Cinéma", "Pizza", "Désert", "Nuage", "Guitare", "Sommeil", "Vitesse", "Montagne"];
+    let attempt = 0;
+
+    function showGame() {
+        document.getElementById('step-rules').classList.add('hidden');
+        document.getElementById('step-play').classList.remove('hidden');
+        generateStart();
+    }
+
+    function generateStart() {
+        let w1 = dictionary[Math.floor(Math.random()*dictionary.length)];
+        let w2 = dictionary[Math.floor(Math.random()*dictionary.length)];
+        while(w1 === w2) w2 = dictionary[Math.floor(Math.random()*dictionary.length)];
+        document.getElementById('wordA').innerText = w1;
+        document.getElementById('wordB').innerText = w2;
+    }
+
+    function startCountdown() {
+        const cd = document.getElementById('countdown');
+        cd.style.display = 'block';
+        let count = 3;
+        cd.innerText = count;
+
+        const timer = setInterval(() => {
+            count--;
+            if(count > 0) {
+                cd.innerText = count;
+            } else if(count === 0) {
+                cd.innerText = "NOW !";
+                if(window.navigator.vibrate) window.navigator.vibrate(200);
+            } else {
+                clearInterval(timer);
+                cd.style.display = 'none';
+                document.getElementById('action-zone').classList.add('hidden');
+                document.getElementById('input-zone').classList.remove('hidden');
+            }
+        }, 800);
+    }
+
+    function validateSync() {
+        const a = document.getElementById('inA').value.trim().toLowerCase();
+        const b = document.getElementById('inB').value.trim().toLowerCase();
+        
+        if(!a || !b) return alert("Les deux joueurs doivent saisir leur mot !");
+
+        attempt++;
+        const log = document.getElementById('history');
+        if(attempt === 1) log.innerHTML = "LOGS :<br>";
+        log.innerHTML += `Essai ${attempt} : ${a} | ${b}<br>`;
+
+        if(a === b) {
+            document.getElementById('step-play').classList.add('hidden');
+            document.getElementById('step-win').classList.remove('hidden');
+            document.getElementById('stats-final').innerText = `Esprits synchronisés en ${attempt} tentative(s).`;
+        } else {
+            document.getElementById('wordA').innerText = a;
+            document.getElementById('wordB').innerText = b;
+            document.getElementById('inA').value = "";
+            document.getElementById('inB').value = "";
+            document.getElementById('input-zone').classList.add('hidden');
+            document.getElementById('action-zone').classList.remove('hidden');
+        }
+    }
+</script>
+</body>
+</html>
