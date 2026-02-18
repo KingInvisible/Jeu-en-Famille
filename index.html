@@ -63,21 +63,26 @@
 </div>
 
 <script>
-    // Note : Pour GitHub, il est préférable d'avoir 5 fichiers HTML séparés.
-    // Mais pour ce test, voici comment on injecte les jeux dynamiquement.
-    function launchGame(gameId) {
+    function openGame(id) {
+        // 1. On cache le menu et on affiche la zone de jeu
         document.getElementById('hub').style.display = 'none';
         document.getElementById('game-view').style.display = 'block';
-        const content = document.getElementById('game-content');
         
-        // Ici, on chargerait l'URL du fichier GitHub
-        // Exemple : content.innerHTML = `<iframe src="games/${gameId}.html"></iframe>`;
-        alert("Chargement du jeu : " + gameId + ". Sur GitHub, chaque jeu sera un fichier séparé.");
+        // 2. On insère l'iframe avec le chemin vers le dossier 'games'
+        // IMPORTANT : 'id' sera remplacé par 'echo', 'sablier', etc.
+        const gameUrl = `games/${id}.html`;
+        
+        document.getElementById('content').innerHTML = 
+            `<iframe src="${gameUrl}" style="width:100%; height:100%; border:none;"></iframe>`;
+        
+        console.log("Chargement du jeu : " + gameUrl);
     }
 
     function closeGame() {
-        document.getElementById('hub').style.display = 'grid';
+        // On réaffiche le menu et on vide l'iframe pour stopper les sons/chronos
+        document.getElementById('hub').style.display = 'block';
         document.getElementById('game-view').style.display = 'none';
+        document.getElementById('content').innerHTML = "";
     }
 </script>
 
