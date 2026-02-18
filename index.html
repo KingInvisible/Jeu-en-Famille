@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Family Game Hub - 5 Jeux Originaux</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600&family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        :root { --p-blue: #00d2ff; --p-pink: #ff007a; --bg: #0a0a12; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        /* HUB STYLE */
+        #hub { display: grid; grid-template-columns: 1fr; gap: 15px; padding: 20px; max-width: 600px; margin: auto; }
+        .game-card { 
+            background: #16213e; border: 1px solid #2e3a59; padding: 20px; border-radius: 15px; 
+            cursor: pointer; transition: 0.3s; position: relative; overflow: hidden;
+        }
+        .game-card:hover { transform: scale(1.02); border-color: var(--p-blue); }
+        .game-card h2 { margin: 0; color: var(--p-blue); font-family: 'Rajdhani'; }
+        .game-card p { font-size: 0.85rem; color: #aaa; margin: 5px 0 0; }
+        
+        /* UI OVERLAY */
+        #game-view { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 100; overflow-y: auto; }
+        .back-btn { position: fixed; top: 10px; left: 10px; background: white; color: black; border: none; padding: 8px 15px; border-radius: 5px; z-index: 101; font-weight: bold; cursor: pointer; }
+        
+        iframe { width: 100%; height: 100%; border: none; }
+    </style>
+</head>
+<body>
+
+<div id="hub">
+    <h1 style="text-align: center; font-family: 'Rajdhani'; letter-spacing: 5px;">GAME HUB</h1>
+    
+    <div class="game-card" onclick="launchGame('echo')">
+        <h2>01. L'Écho Fantôme</h2>
+        <p>Devinez des mots grâce à des bruitages étranges.</p>
+    </div>
+
+    <div class="game-card" onclick="launchGame('sablier')">
+        <h2>02. Le Sablier Humain</h2>
+        <p>Testez votre perception collective du temps.</p>
+    </div>
+
+    <div class="game-card" onclick="launchGame('sync')">
+        <h2>03. The Sync</h2>
+        <p>Fusionnez vos pensées sur un mot commun.</p>
+    </div>
+
+    <div class="game-card" onclick="launchGame('blink')">
+        <h2>04. Blink Code</h2>
+        <p>Infiltration et signaux secrets par clignements d'yeux.</p>
+    </div>
+
+    <div class="game-card" onclick="launchGame('architect')">
+        <h2>05. Architectes Aveugles</h2>
+        <p>Décrivez des textures pour faire dessiner des plans.</p>
+    </div>
+</div>
+
+<div id="game-view">
+    <button class="back-btn" onclick="closeGame()">⬅ HUB</button>
+    <div id="game-content" style="height: 100%;"></div>
+</div>
+
+<script>
+    // Note : Pour GitHub, il est préférable d'avoir 5 fichiers HTML séparés.
+    // Mais pour ce test, voici comment on injecte les jeux dynamiquement.
+    function launchGame(gameId) {
+        document.getElementById('hub').style.display = 'none';
+        document.getElementById('game-view').style.display = 'block';
+        const content = document.getElementById('game-content');
+        
+        // Ici, on chargerait l'URL du fichier GitHub
+        // Exemple : content.innerHTML = `<iframe src="games/${gameId}.html"></iframe>`;
+        alert("Chargement du jeu : " + gameId + ". Sur GitHub, chaque jeu sera un fichier séparé.");
+    }
+
+    function closeGame() {
+        document.getElementById('hub').style.display = 'grid';
+        document.getElementById('game-view').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
