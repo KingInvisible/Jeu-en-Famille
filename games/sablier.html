@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sablier Humain Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --timer-green: #00ff88;
+            --timer-red: #ff416c;
+            --bg-black: #050505;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-black);
+            color: #eee;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 4px;
+            color: var(--timer-green);
+            text-transform: uppercase;
+        }
+
+        .instructions {
+            background: #111;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--timer-green);
+            text-align: left;
+        }
+
+        #action-zone {
+            width: 280px;
+            height: 280px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            margin: 30px auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #action-zone:active {
+            transform: scale(0.95);
+            background: rgba(0, 255, 136, 0.05);
+            border-color: var(--timer-green);
+        }
+
+        .player-tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--timer-green);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .stat-line {
+            background: #111;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .btn-restart {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 20px;
+        }
+
+        .hidden { display: none; }
+        .pulse { animation: pulse-border 2s infinite; }
+        @keyframes pulse-border {
+            0% { border-color: #333; }
+            50% { border-color: #555; }
+            100% { border-color: #333; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="step-rules">
+        <h1>Sablier Humain</h1>
+        <div class="instructions">
+            <strong>🎯 Mission :</strong> Cumuler exactement 5 secondes par joueur.<br><br>
+            1. Le Joueur 1 appuie sur "START".<br>
+            2. Il compte 5s dans sa tête et appuie pour passer au suivant.<br>
+            3. <strong>Silence total !</strong> L'écran devient noir pour ne pas aider.<br>
+            4. Le dernier joueur valide le temps final.
+        </div>
+        <button class="btn-restart" style="color:#fff; border-color:#fff" onclick="goToStep(2)">Suivant</button>
+    </div>
+
+    <div id="step-setup" class="hidden">
+        <h1>Paramètres</h1>
+        <p>Nombre de participants :</p>
+        <div style="margin: 30px 0;">
+            <input type="number" id="p-count" value="3" min="2" max="10" 
+                   style="background: #222; border: none; color: #fff; padding: 15px; font-size: 1.5rem; width: 80px; border-radius: 10px; text-align: center;">
+        </div>
+        <button class="btn-restart" style="color:var(--timer-green); border-color:var(--timer-green)" onclick="initGame()">Lancer le test</button>
+    </div>
+
+    <div id="step-play" class="hidden">
+        <p id="player-indicator" style="font-family:'Orbitron'; color:#666">PRÊT ?</p>
+        <div id="action-zone" onclick="handleTap()">
+            <span class="player-tag" id="zone-text">START</span>
+        </div>
+        <p style="font-size:0.8rem; color:#444">Appuyez pour valider votre tour</p>
+    </div>
+
+    <div id="step-results" class="hidden">
+        <h1 id="verdict-title">VERDICT</h1>
+        <div class="stats-grid" id="stats-display"></div>
+        <div id="total-result" style="font-size: 1.4rem; margin: 20px 0;"></div>
+        <button class="btn-restart" onclick="location.reload()">Réessayer</button>
+    </div>
+</div>
+
+<script>
+    let players = 0;
+    let currentP = 0;
+    let startTime, lastTime;
+    let results = [];
+    const target = 5.0;
+
+    function goToStep(num) {
+        document.querySelectorAll('.card > div').forEach(div => div.classList.add('hidden'));
+        const steps = ['rules', 'setup', 'play', 'results'];
+        document.getElementById('step-' + steps[num-1]).classList.remove('hidden');
+    }
+
+    function initGame() {
+        players = parseInt(document.getElementById('p-count').value);
+        goToStep(3);
+    }
+
+    function handleTap() {
+        const now = Date.now();
+        
+        if (currentP === 0) {
+            // Premier clic (Démarrage)
+            startTime = now;
+            lastTime = now;
+            document.getElementById('zone-text').innerText = "STOP";
+            document.getElementById('action-zone').classList.add('pulse');
+            document.getElementById('player-indicator').innerText = "JOUEUR 1";
+            currentP = 1;
+        } else {
+            // Clics de joueurs
+            let elapsed = (now - lastTime) / 1000;
+            results.push(elapsed);
+            lastTime = now;
+            
+            if (currentP < players) {
+                currentP++;
+                document.getElementById('player-indicator').innerText = "JOUEUR " + currentP;
+            } else {
+                showFinalResults();
+            }
+        }
+    }
+
+    function showFinalResults() {
+        goToStep(4);
+        const total = results.reduce((a, b) => a + b, 0);
+        const totalTarget = players * target;
+        const diffTotal = total - totalTarget;
+        
+        const statsZone = document.getElementById('stats-display');
+        results.forEach((time, i) => {
+            const diff = time - target;
+            const color = Math.abs(diff) < 0.6 ? 'var(--timer-green)' : '#ff416c';
+            statsZone.innerHTML += `
+                <div class="stat-line">
+                    J${i+1}: <strong>${time.toFixed(2)}s</strong><br>
+                    <span style="color:${color}">${diff > 0 ? '+' : ''}${diff.toFixed(2)}s</span>
+                </div>`;
+        });
+
+        const success = Math.abs(diffTotal) < 1.5;
+        document.getElementById('verdict-title').innerText = success ? "MISSION RÉUSSIE" : "ÉCHEC TEMPOREL";
+        document.getElementById('verdict-title').style.color = success ? 'var(--timer-green)' : 'var(--timer-red)';
+        
+        document.getElementById('total-result').innerHTML = `
+            Score: <span style="color:${success ? 'var(--timer-green)' : '#fff'}">${total.toFixed(2)}s</span><br>
+            <small style="font-size:0.9rem; color:#666">Cible: ${totalTarget.toFixed(1)}s</small>
+        `;
+    }
+</script>
+</body>
+</html>
